@@ -1,0 +1,65 @@
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <div class="adminbar">
+        <h1>Dashboard</h1>
+        <div class="right">
+          <a class="btn" href="{{ url_for('admin_export') }}">⬇️ Tải CSV</a>
+          <a class="btn secondary" href="{{ url_for('admin_logout') }}">Đăng xuất</a>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="label">Tổng phản hồi</div><div class="value">{{ total }}</div></div>
+        <div class="card"><div class="label">Điểm hài lòng TB</div><div class="value">{{ avg_sat }}</div></div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <h3>Phân bố tần suất đặt hàng</h3>
+          <ul>
+            {% for k,v in freq_counts.items() %}
+              <li>{{ k }}: <b>{{ v }}</b></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Cảm nhận thương hiệu</h3>
+          <ul>
+            {% for k,v in brand_counts.items() %}
+              <li>{{ k }}: <b>{{ v }}</b></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <h3>10 phản hồi gần nhất</h3>
+      <div class="table">
+        <div class="thead">
+          <div>Thời gian</div><div>Tên</div><div>Vai trò</div><div>Loại cửa hàng</div><div>Hài lòng</div><div>Tần suất</div><div>Brand</div><div>Diaper brand</div><div>Feedback</div>
+        </div>
+        {% for r in recent %}
+        <div class="trow">
+          <div>{{ r.timestamp_iso }}</div>
+          <div>{{ r.name }}</div>
+          <div>{{ r.role }}</div>
+          <div>{{ r.store_type }}</div>
+          <div>{{ r.satisfaction }}</div>
+          <div>{{ r.frequency }}</div>
+          <div>{{ r.brand_perception }}</div>
+          <div>{{ r.primary_diaper_brand }}</div>
+          <div>{{ r.open_feedback }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>

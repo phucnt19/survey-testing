@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 2 - Sử dụng{% endblock %}
+{% block content %}
+<h1>Bước 2: Sử dụng sản phẩm</h1>
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <label for="satisfaction">Mức độ hài lòng khi nhập hàng (1-5) *</label>
+  <input id="satisfaction" type="number" name="satisfaction" min="1" max="5" required>
+
+  <label for="frequency">Tần suất đặt hàng *</label>
+  <select id="frequency" name="frequency" required>
+    <option value="">-- Chọn tần suất --</option>
+    <option>Weekly</option>
+    <option>Monthly</option>
+    <option>Less often</option>
+  </select>
+
+  <button type="submit">Tiếp tục</button>
+</form>
+{% endblock %}

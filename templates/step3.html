@@ -1,0 +1,27 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 3 - Brand{% endblock %}
+{% block content %}
+<h1>Bước 3: Cảm nhận thương hiệu</h1>
+<form method="post" id="brandForm">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+  <label for="brand_perception">Bạn có đồng ý: “Kimberly-Clark cung cấp dịch vụ tốt”?</label>
+  <select id="brand_perception" name="brand_perception" required>
+    <option value="">-- Chọn --</option>
+    <option>Agree</option>
+    <option>Neutral</option>
+    <option>Disagree</option>
+  </select>
+
+  {% if is_baby_store %}
+    <div id="diaperBrandWrap">
+      <label for="primary_diaper_brand">Thương hiệu tã bán chủ lực *</label>
+      <input id="primary_diaper_brand" name="primary_diaper_brand" maxlength="40" placeholder="VD: Huggies, Pampers...">
+      <p class="hint">Chỉ hỏi với cửa hàng loại Baby Store.</p>
+    </div>
+  {% endif %}
+
+  <button type="submit">Tiếp tục</button>
+</form>
+{% endblock %}

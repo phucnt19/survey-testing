@@ -1,0 +1,13 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 4 - Feedback{% endblock %}
+{% block content %}
+<h1>Bước 4: Ý kiến thêm</h1>
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <label for="open_feedback">Chia sẻ thêm về trải nghiệm nhập hàng</label>
+  <textarea id="open_feedback" name="open_feedback" rows="4" maxlength="500" placeholder="Điều gì làm bạn hài lòng / chưa hài lòng?"></textarea>
+  <p class="hint">Tối đa 500 ký tự.</p>
+  <button type="submit">Hoàn tất</button>
+</form>
+{% endblock %}

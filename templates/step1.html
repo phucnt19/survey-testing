@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 1 - Demographics{% endblock %}
+{% block content %}
+<h1>Bước 1: Thông tin chung</h1>
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <label for="name">Tên *</label>
+  <input id="name" name="name" required maxlength="60">
+
+  <label for="role">Vai trò *</label>
+  <select id="role" name="role" required>
+    <option value="">-- Chọn vai trò --</option>
+    <option>Owner</option>
+    <option>Manager</option>
+    <option>Staff</option>
+  </select>
+
+  <label for="store_type">Loại cửa hàng *</label>
+  <select id="store_type" name="store_type" required>
+    <option value="">-- Chọn loại cửa hàng --</option>
+    <option>Grocery</option>
+    <option>Pharmacy</option>
+    <option>Baby Store</option>
+    <option>Other</option>
+  </select>
+
+  <button type="submit">Tiếp tục</button>
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cảm ơn</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Đã nhận phản hồi ✅</h1>
+      <p>Cảm ơn bạn. Bạn có thể đóng tab này.</p>
+      <a class="btn" href="{{ url_for('home') }}">Điền thêm</a>
+      <!-- Không lộ link tải dữ liệu cho respondent -->
+    </div>
+  </body>
+</html>
