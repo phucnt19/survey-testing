@@ -1,32 +1,49 @@
 
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session, abort
-import csv, os, datetime, secrets, re, math
+import os, secrets, re, csv, io, datetime
 from collections import Counter
 
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, send_file
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import OperationalError
+
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")  # replace in prod
-
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-CSV_PATH = os.path.join(DATA_DIR, "responses.csv")
-os.makedirs(DATA_DIR, exist_ok=True)
-
-CSV_HEADER = [
-    "timestamp_iso",
-    "name", "role", "store_type",
-    "satisfaction", "frequency",
-    "brand_perception",
-    "primary_diaper_brand",
-    "open_feedback"
-]
-if not os.path.exists(CSV_PATH):
-    with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow(CSV_HEADER)
-
-STEPS = [1,2,3,4]
-TOTAL_STEPS = len(STEPS)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "changeme")
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Provide a Postgres connection string.")
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(bind=engine)
+
+Base = declarative_base()
+
+class Response(Base):
+    __tablename__ = "responses"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    name = Column(String(80), nullable=False)
+    role = Column(String(30), nullable=False)
+    store_type = Column(String(30), nullable=False)
+
+    satisfaction = Column(Integer, nullable=False)
+    frequency = Column(String(20), nullable=False)
+
+    brand_perception = Column(String(20), nullable=False)
+    primary_diaper_brand = Column(String(60), nullable=True)
+
+    open_feedback = Column(Text, nullable=True)
+
+def init_db():
+    Base.metadata.create_all(engine)
+
+STEPS = [1,2,3,4]
+TOTAL_STEPS = len(STEPS)
 
 def ensure_csrf_token():
     if "csrf_token" not in session:
@@ -117,7 +134,7 @@ def step2():
             for e in errors: flash(e, "error")
             return render_template("step2.html", csrf=csrf, step=2, total=TOTAL_STEPS, progress=progress_pct(2), store_type=session.get("store_type",""))
 
-        session.update({"satisfaction": satisfaction, "frequency": frequency})
+        session.update({"satisfaction": int(satisfaction), "frequency": frequency})
         session["allowed_step"] = 3
         return redirect(url_for("step3"))
 
@@ -164,17 +181,23 @@ def step4():
             flash("Ý kiến thêm tối đa 500 ký tự.", "error")
             return render_template("step4.html", csrf=csrf, step=4, total=TOTAL_STEPS, progress=progress_pct(4))
 
-        session["open_feedback"] = open_feedback
-
-        with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow([
-                datetime.datetime.utcnow().isoformat(),
-                session.get("name"), session.get("role"), session.get("store_type"),
-                session.get("satisfaction"), session.get("frequency"),
-                session.get("brand_perception"),
-                session.get("primary_diaper_brand",""),
-                session.get("open_feedback","")
-            ])
+        from sqlalchemy.orm import scoped_session
+        db = scoped_session(SessionLocal)
+        try:
+            r = Response(
+                name=session.get("name"),
+                role=session.get("role"),
+                store_type=session.get("store_type"),
+                satisfaction=session.get("satisfaction"),
+                frequency=session.get("frequency"),
+                brand_perception=session.get("brand_perception"),
+                primary_diaper_brand=session.get("primary_diaper_brand"),
+                open_feedback=open_feedback or None
+            )
+            db.add(r)
+            db.commit()
+        finally:
+            db.remove()
 
         session.clear()
         return redirect(url_for("thanks"))
@@ -185,7 +208,10 @@ def step4():
 def thanks():
     return render_template("thanks.html")
 
-# -------- Admin area --------
+# Admin
+def is_admin():
+    return session.get("is_admin", False)
+
 @app.route("/admin/login", methods=["GET","POST"])
 def admin_login():
     csrf = ensure_csrf_token()
@@ -206,42 +232,49 @@ def admin_logout():
 
 @app.route("/admin")
 def admin_dashboard():
-    guard = require_admin()
-    if guard: return guard
+    if not is_admin():
+        return redirect(url_for("admin_login"))
 
-    rows = []
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for r in reader:
-            rows.append(r)
-
-    total = len(rows)
-    if total == 0:
-        avg_sat = 0
-    else:
-        sats = [int(r["satisfaction"]) for r in rows if r.get("satisfaction","").isdigit()]
+    db = SessionLocal()
+    try:
+        total = db.query(Response).count()
+        sats = [r.satisfaction for r in db.query(Response.satisfaction).all() if r.satisfaction is not None]
         avg_sat = round(sum(sats)/len(sats), 2) if sats else 0
+        from collections import Counter
+        freq_counts = Counter([r.frequency for r in db.query(Response.frequency).all() if r.frequency])
+        brand_counts = Counter([r.brand_perception for r in db.query(Response.brand_perception).all() if r.brand_perception])
+        recent = db.query(Response).order_by(Response.id.desc()).limit(10).all()
+    finally:
+        db.close()
 
-    freq_counts = Counter(r["frequency"] for r in rows if r.get("frequency"))
-    brand_counts = Counter(r["brand_perception"] for r in rows if r.get("brand_perception"))
-
-    recent = list(reversed(rows))[:10]  # last 10
-
-    return render_template(
-        "admin_dashboard.html",
-        total=total,
-        avg_sat=avg_sat,
-        freq_counts=freq_counts,
-        brand_counts=brand_counts,
-        recent=recent
-    )
+    return render_template("admin_dashboard.html", total=total, avg_sat=avg_sat, freq_counts=freq_counts, brand_counts=brand_counts, recent=recent)
 
 @app.route("/admin/export")
 def admin_export():
-    guard = require_admin()
-    if guard: return guard
-    return send_file(CSV_PATH, as_attachment=True, download_name="responses.csv")
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+
+    db = SessionLocal()
+    import csv, io
+    try:
+        rows = db.query(Response).order_by(Response.id.asc()).all()
+        out = io.StringIO()
+        w = csv.writer(out)
+        w.writerow(["timestamp_iso","name","role","store_type","satisfaction","frequency","brand_perception","primary_diaper_brand","open_feedback"])
+        for r in rows:
+            w.writerow([r.created_at.isoformat(), r.name, r.role, r.store_type, r.satisfaction, r.frequency, r.brand_perception, r.primary_diaper_brand or "", r.open_feedback or ""])
+        out.seek(0)
+    finally:
+        db.close()
+
+    return send_file(io.BytesIO(out.getvalue().encode("utf-8")), mimetype="text/csv", as_attachment=True, download_name="responses.csv")
 
 if __name__ == "__main__":
+    try:
+        init_db()
+    except OperationalError as e:
+        print("DB init failed, check DATABASE_URL:", e)
+        raise
+
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port, debug=True)

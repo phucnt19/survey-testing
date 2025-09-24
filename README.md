@@ -1,37 +1,38 @@
 
-# Flask Survey (Admin & Secure Export)
+# Flask Survey (Postgres)
 
-What you get:
-- Multi-page respondent flow with CSRF + step gating.
-- **Admin login** (`/admin/login`) using env `ADMIN_USER`, `ADMIN_PASS`.
-- **Admin dashboard** (`/admin`) with key stats + last 10 responses.
-- **Admin-only export** (`/admin/export`) — respondents cannot download data.
-- Public UI hides any export link.
+Production-friendly version using PostgreSQL on Render.
+
+## Features
+- Multi-page respondent flow with CSRF + step gating
+- Admin login via env (`ADMIN_USER`, `ADMIN_PASS`)
+- PostgreSQL storage via SQLAlchemy (`DATABASE_URL`)
+- Admin dashboard with aggregates + last 10
+- Admin-only CSV export (`/admin/export`)
 
 ## Run locally
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+export DATABASE_URL="postgresql://user:pass@localhost:5432/mydb"
 export ADMIN_USER=admin
 export ADMIN_PASS=supersecret
-export SECRET_KEY='random-string'
+export SECRET_KEY="random-string"
+
 python app.py  # http://localhost:8000
 ```
 
-Windows (CMD):
-```
-set ADMIN_USER=admin
-set ADMIN_PASS=supersecret
-set SECRET_KEY=random-string
-python app.py
-```
+## Deploy on Render
 
-## Deploy (Render)
-- Build: `pip install -r requirements.txt`
-- Start: `python app.py`
-- Set env: `ADMIN_USER`, `ADMIN_PASS`, `SECRET_KEY`
+1. Create a **PostgreSQL** instance on Render → copy the `External Database URL`.
+2. Create a **Web Service** from this repo.
+3. Set environment variables:
+   - `DATABASE_URL` = (from step 1)
+   - `ADMIN_USER`, `ADMIN_PASS`
+   - `SECRET_KEY` = a long random string
+4. Build: `pip install -r requirements.txt`
+5. Start: `python app.py`
 
-## Notes
-- Consider HTTPS and stronger auth (e.g., session expiry, password hashing) for production.
-- For big samples, switch CSV to a database (Postgres) and paginate the dashboard.
+Tables will auto-create on first boot.

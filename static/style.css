@@ -9,7 +9,6 @@ button, .btn { margin-top: 16px; display: inline-block; padding: 10px 16px; bord
 .btn.secondary { background: #374151; }
 .flash { list-style:none; padding:0; }
 .flash li { padding: 8px 12px; border-radius: 8px; margin: 8px 0; }
-.flash li.error { background: #ffe9e9; color: #8a1d1d; border: 1px solid #f1b0b0; }
 .hint { color:#6b7280; font-size: 12px; margin:6px 0 0; }
 .nav { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
 .nav .step { padding:6px 10px; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:12px; }
