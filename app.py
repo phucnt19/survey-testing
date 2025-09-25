@@ -244,7 +244,17 @@ def step6():
             session["allowed_step"] = 7
             return redirect(url_for("step7"))
         return redirect(url_for("step6"))
-    return render_template("step6.html", csrf=csrf, step=6, total=TOTAL_STEPS, progress=progress_pct(6), brand_label=brand_label, channels=CHANNELS, idx=idx+1, total=len(loop_codes))
+    return render_template(
+        "step6.html",
+        csrf=csrf,
+        step=6,
+        total=TOTAL_STEPS,
+        progress=progress_pct(6),
+        brand_label=brand_label,
+        channels=CHANNELS,
+        idx=idx+1,
+        loop_total=len(loop_codes)  # << thay vì total=len(loop_codes)
+    )
 
 # --- Step7: Grid rating per brand ---
 @app.route("/step7", methods=["GET","POST"])

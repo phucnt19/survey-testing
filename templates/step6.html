@@ -3,7 +3,7 @@
 {% block title %}Bước 6 - Kênh biết đến{% endblock %}
 {% block content %}
 <h1>Bước 6: Bạn biết nhãn hiệu <u>{{ brand_label }}</u> qua kênh nào?</h1>
-<p>Bước {{ idx }} trong {{ total }} (MA)</p>
+<p>Bước {{ idx }} trong {{ loop_total }} (MA)</p>
 <form method="post">
   <input type="hidden" name="_csrf" value="{{ csrf }}">
   <div class="checkboxes">
