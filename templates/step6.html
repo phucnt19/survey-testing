@@ -1,0 +1,19 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 6 - Kênh biết đến{% endblock %}
+{% block content %}
+<h1>Bước 6: Bạn biết nhãn hiệu <u>{{ brand_label }}</u> qua kênh nào?</h1>
+<p>Bước {{ idx }} trong {{ total }} (MA)</p>
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <div class="checkboxes">
+    {% for c in channels %}
+      <label class="chk"><input type="checkbox" name="channels" value="{{ c.code }}"> {{ c.label }}</label>
+      {% if c.code == 98 %}
+        <div class="indent"><input type="text" name="channel_other_text" placeholder="Ghi rõ kênh khác"></div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <button type="submit">Tiếp tục</button>
+</form>
+{% endblock %}

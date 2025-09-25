@@ -12,16 +12,15 @@
       <div class="adminbar">
         <h1>Dashboard</h1>
         <div class="right">
-          <a class="btn" href="{{ url_for('admin_export') }}">⬇️ Tải CSV</a>
+          <a class="btn" href="{{ url_for('admin_export') }}?mode=value">⬇️ Tải CSV (value)</a>
+          <a class="btn secondary" href="{{ url_for('admin_export') }}?mode=text">⬇️ Tải CSV (text)</a>
           <a class="btn secondary" href="{{ url_for('admin_logout') }}">Đăng xuất</a>
         </div>
       </div>
-
       <div class="cards">
         <div class="card"><div class="label">Tổng phản hồi</div><div class="value">{{ total }}</div></div>
         <div class="card"><div class="label">Điểm hài lòng TB</div><div class="value">{{ avg_sat }}</div></div>
       </div>
-
       <div class="grid">
         <div>
           <h3>Phân bố tần suất đặt hàng</h3>
@@ -40,7 +39,6 @@
           </ul>
         </div>
       </div>
-
       <h3>10 phản hồi gần nhất</h3>
       <div class="table">
         <div class="thead">

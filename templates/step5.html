@@ -1,0 +1,45 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 5 - Nhãn hiệu{% endblock %}
+{% block content %}
+<h1>Bước 5: Các nhãn hiệu bạn đang bán/biết đến</h1>
+<form method="post" id="brandsForm">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <p>Chọn tất cả những nhãn hiệu phù hợp (MA). Nếu chọn "Không có nhãn hiệu nào" thì không chọn nhãn khác.</p>
+  <div class="checkboxes" id="brandList">
+    {% for b in brands %}
+      <label class="chk">
+        <input type="checkbox" name="brands" value="{{ b.code }}" {% if b.code == 99 %}data-exclusive="true"{% endif %}>
+        {{ b.label }}
+      </label>
+      {% if b.code == 98 %}
+        <div class="indent">
+          <input type="text" name="brand_other_text" placeholder="Ghi rõ nhãn hiệu khác">
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <button type="submit">Tiếp tục</button>
+</form>
+
+<script>
+  (function(){
+    const list = document.getElementById('brandList');
+    if(!list) return;
+    const boxes = () => Array.from(list.querySelectorAll('input[name="brands"]'));
+    const exclusive = () => list.querySelector('input[name="brands"][data-exclusive="true"]');
+    list.addEventListener('change', (e) => {
+      const t = e.target;
+      if(t.name !== 'brands') return;
+      const noneBox = exclusive();
+      if(t.dataset.exclusive === 'true'){
+        if(t.checked){
+          boxes().forEach(cb => { if(cb !== t) cb.checked = false; });
+        }
+        return;
+      }
+      if(noneBox && noneBox.checked){ noneBox.checked = false; }
+    });
+  })();
+</script>
+{% endblock %}

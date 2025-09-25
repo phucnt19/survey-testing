@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+{% block title %}Bước 7 - Đánh giá{% endblock %}
+{% block content %}
+<h1>Bước 7: Đánh giá các nhãn hiệu</h1>
+<p>Đánh giá theo thang 1–5 cho mỗi nhãn hiệu (1 = Rất kém, 5 = Rất tốt)</p>
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <div class="table">
+    <div class="thead">
+      <div>Nhãn hiệu</div>
+      <div style="text-align:center">1</div><div style="text-align:center">2</div><div style="text-align:center">3</div><div style="text-align:center">4</div><div style="text-align:center">5</div>
+    </div>
+    {% for b in brands %}
+      <div class="trow">
+        <div>{{ b.label }}</div>
+        {% for s in [1,2,3,4,5] %}
+          <div style="text-align:center"><input type="radio" name="rating_{{ b.code }}" value="{{ s }}"></div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  <button type="submit">Hoàn tất</button>
+</form>
+{% endblock %}

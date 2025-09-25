@@ -10,7 +10,6 @@
   <body>
     <div class="container">
       <h1>Đăng nhập Admin</h1>
-
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <ul class="flash">
@@ -20,7 +19,6 @@
           </ul>
         {% endif %}
       {% endwith %}
-
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
         <label>Tài khoản</label>

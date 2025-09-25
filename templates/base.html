@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="vi">
   <head>
@@ -12,13 +13,12 @@
         <div class="progress-bar" style="width: {{ progress|default(0) }}%"></div>
       </div>
       <div class="nav">
-        <span class="step">B1</span><span class="step">B2</span><span class="step">B3</span><span class="step">B4</span>
+        <span class="step">B1</span><span class="step">B2</span><span class="step">B3</span><span class="step">B4</span><span class="step">B5</span><span class="step">B6</span><span class="step">B7</span>
         <span class="spacer"></span>
         {% if step and step > 1 %}
           <a class="btn secondary" href="{{ url_for('back', from_step=step) }}">← Quay lại</a>
         {% endif %}
       </div>
-
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <ul class="flash">
@@ -28,7 +28,6 @@
           </ul>
         {% endif %}
       {% endwith %}
-
       {% block content %}{% endblock %}
     </div>
   </body>
